@@ -132,17 +132,17 @@ Therefore, if we generate enough samples past rewards cancel out to zero when av
 
 $$
 \begin{aligned}
-\mathbb{E}\left[\nabla_\theta \log \pi_\theta(a_t \mid s_t)\; r_{t'}\right]
+\mathbb{E}\left[\nabla_\theta \log \pi_\theta(a_t \mid s_t)\; r_{t\prime}\right]
 &= \mathbb{E}_{s_t \sim p(\tau)}\left[
-    \mathbb{E}_{(a_t, r_{t'}) \sim p(\tau)}\left[
-        \nabla_\theta \log \pi_\theta(a_t \mid s_t)\; r_{t'} \,\mid\, s_t
+    \mathbb{E}_{(a_t, r_{t\prime}) \sim p(\tau)}\left[
+        \nabla_\theta \log \pi_\theta(a_t \mid s_t)\; r_{t\prime} \,\mid\, s_t
     \right]\right] \\\\[6pt]
 &= \mathbb{E}\left[
-    \mathbb{E}[r_{t'} \mid s_t]\,
+    \mathbb{E}[r_{t\prime} \mid s_t]\,
     \mathbb{E}[\nabla_\theta \log \pi_\theta(a_t \mid s_t)\mid s_t]
 \right] \\\\[6pt]
 &= \mathbb{E}\left[
-    \mathbb{E}[r_{t'}]\,
+    \mathbb{E}[r_{t\prime}]\,
     \mathbb{E}[\nabla_\theta \log \pi_\theta(a_t \mid s_t)\mid s_t]
 \right] \\\\[6pt]
 \mathbb{E}[\nabla_\theta \log \pi_\theta(a_t \mid s_t)\mid s_t]
@@ -154,8 +154,8 @@ $$
 &= \nabla_\theta 1 \\\\[6pt]
 &= 0 \\\\[6pt]
 \therefore\quad
-\mathbb{E}\left[\nabla_\theta \log \pi_\theta(a_t \mid s_t)\; r_{t'}\right] &= 0
-\quad (t' < t).
+\mathbb{E}\left[\nabla_\theta \log \pi_\theta(a_t \mid s_t)\; r_{t\prime}\right] &= 0
+\quad (t\prime < t).
 \end{aligned}
 $$
 
@@ -226,7 +226,7 @@ By markov property, we can think that each state and action pair is sampled from
 Calculating the probabilities of these marginals is impossible without knowing the initial state distribution and transition probabilities.
 Therefore, by applying the chain rule of probability, we can decompose the marginal distribution into two terms.
 
-Ignoring the state marginals is similar to the top of the slide, where all importance sampling ratios are neglected except at $t^\prime$, thereby reducing the variance.
+Ignoring the state marginals is similar to the top of the slide, where all importance sampling ratios are neglected except at $t\prime$, thereby reducing the variance.
 * Strictly speaking, this does not provide the correct policy gradient.
 * Nevertheless, it remains reasonable, as the resulting error is bounded when the two distributions are sufficiently close
 
@@ -270,7 +270,7 @@ When we re-normalize the gradient, the $\sigma$-component dominates and the upda
 Picking a single step size that works for $k, \sigma$ is very hard because of poor conditioning.
 Gradient ascent can be seen as iteratively solving the first order taylor expansion of the objective $J(\theta)$ with a constraint.
 
-* The first order taylor expansion: $J(\theta^\prime) \approx J(\theta) + (\theta^\prime - \theta)^T \nabla_\theta(J(\theta))$
+* The first order taylor expansion: $J(\theta\prime) \approx J(\theta) + (\theta\prime - \theta)^T \nabla_\theta(J(\theta))$
 * The constraint is similar to a learning rate, where $\alpha$ serves as the Lagrange multiplier corresponding to $\epsilon$.
 
 If the parameter space is constrained, we have the same problem: poor conditioning.
@@ -284,14 +284,14 @@ To fix this, we can change the constraint to be in terms of the KL divergence be
 * $D_{KL}(p(x)\parallel q(x))=D_{KL}(p(y)\parallel q(y)), \quad \text{where } y=f(x)$
 
 Constrainted optimization is conducted at every gradient step, so it should be very simple.
-If we take the second-order Taylor expansion of the KL divergence around $\pi_{\theta^\prime} \approx \pi_\theta$, the KL divergence can be approximately expressed as a quadratic form involving the Fisher information matrix.
+If we take the second-order Taylor expansion of the KL divergence around $\pi_{\theta\prime} \approx \pi_\theta$, the KL divergence can be approximately expressed as a quadratic form involving the Fisher information matrix.
 * The Fisher Information Matrix shows how much information the data contains about distribution parameters. For a parameter vector $\theta$, it is the covariance matrix of the score function (the gradient of the log-likelihood).
 
 <p align="center">
   <img src="asset/05/natural_policy_gradient3.png" width="800" alt="Natural policy gradient" style="vertical-align:middle;"/> 
 </p>
 
-* $(\theta^\prime - \theta)^TF(\theta^\prime - \theta) = ||\theta^\prime - \theta||^2_F$
+* $(\theta\prime - \theta)^TF(\theta\prime - \theta) = ||\theta\prime - \theta||^2_F$
 
 Using the lagrangian, the soultion can be derive, where $\alpha$ is lagrangian multiplier and $F$ is the pre-conditioner.
 * In this formula, $F$ measure the sensitivity of the policy distribution to changes in the parameters. $F_{kk}$ represents the variance of gradient of $\theta_k$.
