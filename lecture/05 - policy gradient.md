@@ -59,6 +59,7 @@ Since the transition probability is unknown, we evaluate the objective by sampli
   width="800" style="vertical-align:middle;"/>
 </p>
 
+We move the log derivative inside the expectation because directly differentiating the probability of the entire trajectory with respect to θ is intractable.
 Differentiation operator is linear.
 So, we can push it inside the integral.
 In this way, we differentiate the objective value using only smaples like evaluation.
@@ -159,7 +160,7 @@ $$
 \end{aligned}
 $$
 
-The variance is reduced since some terms are removed from from the summation.
+The variance is reduced since some terms are removed from the summation.
 Note that , for a finite sample size, past rewards wouldn't cancel out to zero.
 Removing all past rewards will change the policy gradient estimator, but the estimator is still unbiased.
 
