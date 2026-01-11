@@ -386,7 +386,7 @@ Newton's method와의 연결을 통해 iterative LQR 조금 더 개선해 보자
 iLQR에서는 forward pass에서 backtracking을 수행할 수 있다.
 * 계산한 해가 이전보다 더 나은지 확인하고, 더 나아지지 않았다면 이전 위치에 더 가까이 이동한다.
 * 상수항인 $k_t$에 0과 1 사이의 상수 $\alpha$를 곱해 시작점에서 얼마나 벗어날 지를 제어한다.
-* $alpha$를 줄이면 이전에 가졌던 action sequence에 점점 더 가까워지게 된다.
+* $\alpha$를 줄이면 이전에 가졌던 action sequence에 점점 더 가까워지게 된다.
     * $\alpha$를 0으로 설정하면 첫 번째 time step에서 $x_1$은 항상 같으므로 $x_1 - \hat{x}_1 = 0$이 되어 $u_t = \hat{u}_t$가 된다.
     * 이를 반복하면 $\hat{x}_t, \hat{u}_t$는 변화 없이 그대로 유지된다.
 * 개선을 얻을 때까지 $\alpha$를 탐색한다.
