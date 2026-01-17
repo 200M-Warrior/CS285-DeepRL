@@ -394,5 +394,5 @@ iLQR에서는 forward pass에서 backtracking을 수행할 수 있다.
   * 또 다른 방법은 2차 근사로부터 예상되는 cost 개선량을 계산하고, 실제로 그 예상 개선량의 일정 비율을 얻을 때까지 $\alpha$를 줄이는 것이다.
   * Bracketing line search를 같은 것이 좋은 선택이 될 수 있다.
 
-
+추가로 읽은 만한 paper는 lecture 10, part 5 강의를 참고하자.
 
