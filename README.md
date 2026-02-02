@@ -5,4 +5,4 @@
 
 📂 Repository Structure
 - `lecture/` → Notes and summaries from CS285 lectures
-- `homework/` → Homework assignments from CS285 course
+- `homework/` → Homework assignments from CS285 course [(link)](https://github.com/berkeleydeeprlcourse/homework_fall2023)
