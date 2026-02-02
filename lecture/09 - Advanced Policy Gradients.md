@@ -113,7 +113,7 @@ $\pi_{\theta^\prime}$가 $\pi_\theta$에 "가깝다(close)"라는 것은 $\pi_{\
     * $p_\text{mistake}$는 적어도 한 번의 실수를 했을 때 얻는 state의 분포로 이것에 대해서 알 수 없다.
     * 이 방식이 behavioral cloning을 분석할 때 가졌던 방정식과 정확히 같다는 것을 인식해야 한다.
 
-이 방정식은 $p_{\theta^\prime}$와 $p_\theta$ 사이의 TV(total variation) divergence를 본질적으로 다른 부분만으로 쓸 수 있다는 것을 의미합니다.
+이 방정식은 $p_{\theta^\prime}$와 $p_\theta$ 사이의 TV(total variation) divergence를 본질적으로 다른 부분만으로 쓸 수 있다는 것을 의미한다.
 * TV Divergence는 두 확률 분포가 얼마나 다른지 측정하는 지표로 $\text{TV}(p_{\theta^\prime}(s_t), p_\theta(s_t)) = |p_{\theta^\prime}(s_t) - p_\theta(s_t)|$로 표현된다.
   *  여기선 pointwise하게 모든 state $s_t$에 대해 $\epsilon$으로 bounded되면 두 분포가 가깝다라고 정의했다.
   실제로는 expecation에 관한 bound를 사용할 수 있지만 이해하기 쉬운 pointwise로 일단 살펴보겠다.
@@ -193,7 +193,7 @@ $$J(\theta^\prime) - J(\theta) \geq \bar{A}(\theta^\prime) - 2\epsilon t C$$
 * 주의해야 할 것은 $\epsilon t \times C$에 비례하는 오차 항이 있다는 것이다.
 * 오차 항의 모든 것은 상수 ($C$) 이고 $\epsilon$ 은 새로운 policy와 이전 policy 사이의 total variation divergence이다.
 * 즉, 새로운 policy가 old policy와 가까우면 ($\epsilon$이 작으면), 간단한 objective $\bar{A}$를 최대화하는 것이 진짜 RL objective를 최대화하는 것과 거의 같다.
-* 이것은 좋은 성능을 얻고 싶다면 사용해야 하는 강화학습 알고리즘의 종류에 대해 무언가를 암시합니다.
+* 이것은 좋은 성능을 얻고 싶다면 사용해야 하는 강화학습 알고리즘의 종류에 대해 무언가를 암시한다.
   * Policy를 크게 업데이트 $\rightarrow$ $\epsilon$ 커짐 $\rightarrow$ 오차 항 커짐 $\rightarrow$ 근사가 나빠짐 $\rightarrow$ 성능 보장 없음
   * 이를 고려해 제안된 알고리즘이 TRPO (Trust Region Policy Optimization)와 PPO (Proximal Policy Optimization)이다.
     * TRPO: "Trust region" 안에서만 업데이트
@@ -237,7 +237,7 @@ Lagrangian은 constraint 조건의 좌변($D_{KL}$)에서 우변($\epsilon$)을 
 * 직관적으로 constraint 조건이 너무 많이 위반되면 $\lambda$를 높이고, 그렇지 않으면 낮춘다.
 * 이를 dual gradient descent라 하며 이후 강의에서 dual gradient descent에 대해 더 자세히 다룰 것이다.
 * 지금은 점근적으로 올바른 Lagrange multiplier를 찾아 contraint 최적화 문제를 풀 것이라는 점만 알고 있으면 된다.
-* Heuristic하게 $\lambda$ 값을 수동으로 선택하고 KL divergence를 일종의 regularizer로 취급하는 것도 매우 합리적입니다.
+* Heuristic하게 $\lambda$ 값을 수동으로 선택하고 KL divergence를 일종의 regularizer로 취급하는 것도 매우 합리적이다.
 
 최종적으로 $\theta^\prime$에 대해 미분을 진행하여 importance sampled policy gradient 형태를 진행할 수 있고, KLD의 gradient도 간단하게 구할 수 있다.
 * 이 아이디어의 변형을 사용하는 여러 알고리즘(Guided Policy Search, PPO)가 있고 잘 작동하는 경향이 있다.
@@ -337,7 +337,7 @@ $\theta^\prime = \theta + \alpha F^{-1}\nabla_\theta J(\theta)$을 Natural Gradi
 * Lecture 5 policy gradient 후반부의 예시를 생각해라.
 * 왼쪽이나 오른쪽으로 갈 수 있는 action이 있고, reward는 -s² - a²로 주어진다.
 * 두 개의 policy parameter ($k, \sigma$)가 있고 action의 확률은 정규분포 $\mathcal{N}(k \times s, \sigma)$를 따른다고 가정한다.
-* 수식적으로 $\sigma$가 감소함에 따라 $\sigma$에 대한 gradient가 $k$에 대한 gradient보다 훨씬 더 커집니다.
+* 수식적으로 $\sigma$가 감소함에 따라 $\sigma$에 대한 gradient가 $k$에 대한 gradient보다 훨씬 더 커진다.
 * 즉, 최적 해가 $k = -1$에 있더라도, $\sigma$를 감소시키는 데만 gradient가 dominant되어 있어 그 최적 해에 절대 도달하지 못할 수 있다.
 * 직관적으로 이런 일이 발생하는 이유는 $k$와 $\sigma$가 확률에 서로 다른 정도로 영향을 미치기 때문이다.
 * 이러한 문제는 continuous distributuion일 때 더욱 두드러진다.
