@@ -667,7 +667,7 @@ Information gain은 Bayesian 방법으로 parameter vector의 변화를 측정�
 이에 국한되지 않고 이전에 살펴본 것처럼 reconsturction error에 기반한 방법 또한 활용할 수 있다.
 * Model error, model gradient에 대한 exploration bonus를 사용할 수 있으며 다른 많은 variation이 존재한다.
 
-### 5.4. Recap
+## 5.4. Recap
 
 <p align="center">
   <img src="asset/13/recap.jpg" alt="Recap"  width="800" style="vertical-align:middle;"/>
