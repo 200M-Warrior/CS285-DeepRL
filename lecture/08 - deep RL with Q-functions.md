@@ -364,7 +364,7 @@ Bellman error는 일종의 최소제곱 회귀 문제이기 때문에, 제곱 �
 하지만 제곱 오차 objective function는 그 action이 얼마나 나쁜지를 정확히 맞추려고 한다.
 예를 들어, 좋은 action들이 +10, +9, +8 정도이고, 나쁜 action이 -1,000,000이라면, 그 -1,000,000이 엄청난 gradient를 만들낸다.
 하지만 실제로는 -900,000으로 예측해도 policy는 동일하다. 
-그럼에도 불구하고 Q function의 objective function는 그 값을 정확히 맞추는 데 집착하고, 이로 인해 큰 gradient가 발생합니다.
+그럼에도 불구하고 Q function의 objective function는 그 값을 정확히 맞추는 데 집착하고, 이로 인해 큰 gradient가 발생한다.
 
 이를 해결하기 위해 gradient clipping할 수 있고, 또는 Huber loss을 사용할 수 있다. 
 * Huber loss은 제곱 오차 손실과 절댓값 손실 사이를 보간한 것이라고 생각할 수 있다.
