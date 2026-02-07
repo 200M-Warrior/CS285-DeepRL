@@ -70,7 +70,7 @@ The bootstrap estimate combines the reward at time t with the estimated value of
 
 # 5. Discount Factors
 
-Let's discuss fitting value functions using bootstrap in the infinite horizon setting, where episode length is $\infin$.
+Let's discuss fitting value functions using bootstrap in the infinite horizon setting, where episode length is $\infty$.
 If the rewards are always postivie, $V^\pi_\phi$ may get infinitely large.
 
 $$
