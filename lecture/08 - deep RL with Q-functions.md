@@ -55,7 +55,7 @@ Q-learning을 fitted Q-iteration처럼 같은 dataset에 대해 여러 번 $(K>1
   <img src="asset/08/q_learning_target_networks.jpg" alt="Classic DQN" width="800" style="vertical-align:middle;"/>
 </p>
 
-Replay buffer를 사용한 업데이트와 매우 유사하지만, max 안의 파라미터$(\phi^\prime)$가 업데이트하려는 파라미터$(\phi)$와 다르다.
+Replay buffer를 사용한 업데이트와 매우 유사하지만, max 안의 파라미터 $(\phi^\prime)$가 업데이트하려는 파라미터 $(\phi)$와 다르다.
 데이터를 수집하고 업데이트를 하는 과정(Step 2, 3)을 N번 반복하고 $\phi^\prime$를 $\phi$로 업데이트하는 큰 외부 loop가 있다.
 * 큰 외부 loop 내에서는 $\phi^\prime$가 고정되어 있으므로, target $y_i$가 변경되지 않는다.
 이를 통해 훨씬 안정적이고 의미 있는 Q function을 학습할 가능성이 높다.
