@@ -84,7 +84,10 @@ Constraint를 구현하는 3가지 방법에 대해 알아보자.
 
 Constraint을 explicit하게 구현하는 가장 간단한 방법은 actor의 objective function을 직접수정 하는 것이다.
 * 단점이 있지만 쉽게 다룰 수 있는 KLD constraint를 예로 들자.
-* KLD를 풀어 쓰면, $D_\text{KL}(\pi||\pi_\beta) = -\mathbb{E}_\pi[\log \pi_\beta(a|s)] - \mathcal{H}(\pi)$ 로 나타낼 수 있다.
+* KLD를 풀어 쓰면 아래와 같다.
+
+$$D_\text{KL}(\pi||\pi_\beta) = -\mathbb{E}_\pi[\log \pi_\beta(a|s)] - \mathcal{H}(\pi)$$
+
 * Constraint에 lagrange multiplier $\lambda$를 곱해 objective function과 결합하면 constraint가 없는 문제로 작성할 수 있다.
 * Lagrange multiplier $\lambda$값을 dual gradient descent로 찾거나 hyper-parameter tuning으로 찾을 수 있다.
 * $\log \pi_\beta$에 $\pi_\beta$가 필요하고 이를 추정하기 위해 behavior cloning과 같은 어려운 작업을 수행해야 한다.
@@ -105,7 +108,9 @@ Constraint을 explicit하게 구현하는 가장 간단한 방법은 actor의 ob
 $\pi_\beta$ 추정을 피하는 한 가지 방법은 implicit policy constraint를 사용하는 것이다.
 
 Explicit policy constraint method에서 constraint를 lagrangian duality를 활용해 closed form으로 풀면 위 그림과 같은 $\pi^\star$를 얻을 수 있다.
-* $\pi^\star = \text{argmax}_\pi\mathbb{E}_{a\sim\pi(a|s)}[\cdot]$
+
+$$\pi^\star = \text{argmax}_\pi\mathbb{E}_{a\sim\pi(a|s)}[\cdot]$$
+
 * $\pi^\star$가 직관적 의미를 살펴보면, $\lambda$가 0이면 $\frac{A^\pi}{\lambda}$의 값이 무한대가 되고, 결국 $A^\pi$를 최대화하는 action에 확률 1을 할당하고 다른 모은 것에 0을 할당하는 greedy policy이다.
 반면 $\lambda$가 커지면 $\pi_\beta(a|s)$를 더욱 많이 고려하게 돼서 $\pi_\beta$에서 확률이 매우 낮은 action은 advantage가 높더라도 결국 최종 확률은 낮게 유지된다.
 
@@ -119,8 +124,7 @@ $$
 \begin{aligned}
 \min_{\pi_\theta}D_\text{KL}(\pi_\theta || \pi^\star) &= \max_{\pi_\theta} \sum_{\mathcal{D}} \pi^\star(a|s) \log \pi_\theta(a|s) \\
 &= \max_{\pi_\theta} \sum_{\mathcal{D}} \frac{1}{Z(s)}\pi_\beta(a|s)\exp\left(\frac{1}{\lambda}A^{\pi_\text{old}(s,a)}\right) \log \pi_\theta(a|s) \\
-
-\therefore \pi_\text{new} &= \argmax_{\pi_\theta}\mathbb{E}_{(s,a)\sim\pi_\beta}\left[ \log \pi_\theta(a|s) \frac{1}{Z(s)}\exp\left(\frac{1}{\lambda}A^{\pi_\text{old}(s,a)}\right) \right]
+\therefore \ \pi_\text{new} &= \text{argmax}_{\pi_\theta}\mathbb{E}_{(s,a)\sim\pi_\beta}\left[ \log \pi_\theta(a|s) \frac{1}{Z(s)}\exp\left(\frac{1}{\lambda}A^{\pi_\text{old}(s,a)}\right) \right]
 \end{aligned}
 $$
 
@@ -144,9 +148,12 @@ $$
 AWAC/AWR 방법에 2 군데에서 OOD query를 해야 한다는 문제가 있다.
 왜냐하면 학습 되는 중간에 $\pi_\theta$가 constraint를 준수한다는 보장이 없기 때문에 $\pi_\theta$가 필요한 부분에서 OOD query가 발생할 수 있다.
 * 첫 번째는 critic에서 $\pi_\theta$ 하에 target 값의 기댓값을 계산할 때이다.
-  * $Q(s,a) = r + \gamma \mathbb{E}_{a^\prime \sim \pi_\theta}[Q(s^\prime, a^\prime)]$
+
+$$Q(s,a) = r + \gamma \mathbb{E}_{a^\prime \sim \pi_\theta}[Q(s^\prime, a^\prime)]$$
+
 * 두 번재는 advantage를 계산할 때이다.
-  * $A^\pi(s,a) = Q(s,a) - \mathbb{E}_{a^\prime \sim \pi_\theta}[Q(s, a^\prime)]$
+
+$$A^\pi(s,a) = Q(s,a) - \mathbb{E}_{a^\prime \sim \pi_\theta}[Q(s, a^\prime)]$$
 
 <p align="center">
   <img src="asset/16/offline_rl_implicit_constraint3.jpg" alt="Implicit Policy constraint methods"  width="800" style="vertical-align:middle;"/>
@@ -154,9 +161,12 @@ AWAC/AWR 방법에 2 군데에서 OOD query를 해야 한다는 문제가 있다
 
 OOD query를 피하는 방법을 살펴 보자.
 
-$\mathbb{E}_{a^\prime \sim \pi_\theta}[Q(s^\prime, a^\prime)] = V(s^\prime)$이다.
+$$\mathbb{E}_{a^\prime \sim \pi_\theta}[Q(s^\prime, a^\prime)] = V(s^\prime)$$
+
 이때, $V(s^\prime)$을 $\pi$를 활용해 구할 수 있지만, 어떤 neural network로 훈련한다고 하자.
-$\ell(V(s_i),Q(s_i, a_i))$라고 한 뒤, 샘플 데이터에 대해 학습을 진행하면 $V(s_i) = \mathbb{E}_{\pi_\beta}\left[Q(s_i, a_i)\right]$가 된다.
+$\ell(V(s_i),Q(s_i, a_i))$라고 한 뒤, 샘플 데이터에 대해 학습을 진행하면 아래와 같다.
+
+$$V(s_i) = \mathbb{E}_{\pi_\beta}\left[Q(s_i, a_i)\right]$$
 
 Trajectory 관점에서 dataset에 있는 $(s,a,r,s^\prime)$는 아마도 한 번만 존재할 것이지만 다른 비슷한 state $s$에서 한 다른 actions가 있을 수 있다.
 따라서 $V(s)$는 일반화를 통해 $s$와 비슷한 state에서 관측된 다양한 actions의 Q 값을 반영하게 되며, $V(s)$ 학습 시 이러한 Q 값들의 분포 $p(V(s))$가 형성된다.
