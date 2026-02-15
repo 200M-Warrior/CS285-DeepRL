@@ -148,7 +148,6 @@ Contentration inequalities는 확률 변수의 추정치가 진짜 기댓값 주
   반대로, 실제 평균 $\mu$에 $\epsilon$을 뺀 것보다 추정된 평균 $\bar{X}_N$이 작거나 같을 확률의 bound를 알 수 있다.
 * 이것은 추정치 $\bar{X}_N$이 진짜 평균 $\mu$ 주위로 얼마나 빨리 집중되는지 설명한다.
   * $\epsilon$이 $\mu$ 주위의 범위를 뜻한다.
-* 
 
 호프딩 부등식을 재해석하여 $\epsilon$ 이상 벗어날 확률을 $\delta$로 만들어, $\epsilon$보다 작은 error를 가지는 최소 확률을 $1-\delta$로 표현할 것이다.
 * 양의 방향, 음의 방향 둘 다로 벗어날 수 있는 것을 고려해 $\delta$를 위에서 본 확률의 2배보다 작거나 같다고 말할 수 있다.
@@ -166,7 +165,7 @@ RL에서는 샘플링을 통해 categorical 분포 $p(s^\prime|s,a)$를 추정�
 
 $1, \cdots, d$까지의 값을 가지는 discrete probability $q$가 있다고 하자.
 $q$는 합이 1인 vector로 표현할 수 있고, 경험적 샘플링을 통해 구할 수 있다.
-* 2-norm은 평균적인 error를 나타내므로 outlier에 취약하기 때문에 total variation divergence을 나타내는 1-norm으로 error를 계산하는 것 같다...??
+* L2-norm은 평균적인 error를 나타내므로 outlier에 취약하기 때문에 total variation divergence을 나타내는 L1-norm으로 error를 계산하는 것 같다...??
 
 호프딩 부정식과 다른점은 error 범위를 나타내는 값이 상수 $\epsilon$만 있는 것이아니라는 것과 확률의 지수가 약간 다르다는 것이다.
 하지만 같은 방식으로 $\delta$와 $\epsilon$의 function으로 $n$을 구할 수 있다.
@@ -187,7 +186,7 @@ $q$는 합이 1인 vector로 표현할 수 있고, 경험적 샘플링을 통해
 
 먼저 $\hat{p}$와 $\hat{Q}^\pi$의 관계만 살펴보자.
 
-Q function $Q^\pi \in \mathbb{R}^{|S||A|}$, reward function $r \in \mathbb{R}^{|S||A|}$, transition function $P \in \mathbb{R}^{|S| \times |S||A|}$, value function $V^\pi \in \mathbb{R}^{|S|}$, policy $\Pi \in \mathbb{R}^{|S||A| \times |S|}$라 하자.
+Q function $Q^\pi \in \mathbb{R}^{|S||A|}$, reward function $r \in \mathbb{R}^{|S||A|}$, transition function $P \in \mathbb{R}^{|S||A| \times |S|}$, value function $V^\pi \in \mathbb{R}^{|S|}$, policy $\Pi \in \mathbb{R}^{|S||A| \times |S|}$라 하자.
 
 그럼 $Q^\pi$는 우상단의 수식과 같이 $P^\pi$의 식으로 나타낼 수 있다.
 둘은 비선형 관계를 가지고 이는 모든 dynamics에 대해 참이다.
@@ -270,13 +269,149 @@ $$
 
 # 3. Sample Complexity in Model-Free RL
 
+Dynamics model이 없는 상황에서 Q function을 학습하여 RL을 진행하는, model-free 알고리즘인 fitted Q iteration을 이론적으로 분석해보자.
+일반적으로 fitted Q iteration이 수렴한다는 보장은 없지만, 이론적 분석이 가능한 일종의 이상적인 fitted Q iteration model을 사용한다고 가정한다.
 
+<p align="center">
+  <img src="asset/17/fitted_q_iteration.jpg" alt="Analyzing fitted Q-iteration"  width="800" style="vertical-align:middle;"/>
+</p>
 
+Fitted Q iteration은 반복 단계에서 bellman optimality operator $T$를 사용한다.
+* $TQ = r + \gamma P \max_a Q $
+* $Q \in \mathbb{R}^{|S||A|}$, $\max_a Q \in \mathbb{R}^{|S|}$, $P \in \mathbb{R}^{|S||A| \times |S|}$, $r \in \mathbb{R}^{|S||A|}$
+* $\max_a$ 연산을 일종의 state 별 최대화를 수행한다고 생각하자.
 
+위의 과정에서 2가지 error가 발생한다.
+* Sampling error: $T \neq \hat{T}$
+  * $r$과 $P$를 샘플로 추정된 값을 사용하기 때문에 다르다.
+* Approximation error: $\hat{Q}_{k+1} \neq \hat{T}\hat{Q}_k$
+  * Neural network는 항상 $\hat{T}\hat{Q}_k$가 되도록 $\hat{Q}_{k+1}$을 학습하지만, 정확히 똑같은 값을 가지도록 학습하지 못하기 때문에 error가 발생한다.
 
+실제 fitted Q iteration에서는 개별 transition $(s,a,r,s^\prime)$이 서로 다른 loss를 가지고, 이 loss를 평균을 최소화 하려고한다.
+반면 $\hat{T}$ operator에서 처음부터 $\hat{r}$과 $\hat{P}$을 여러 샘플의 값으로 평균내고 한 번의 bellman backup을 진행한다.
+그리고 L2 norm을 사용하기 때문에 둘은 동일한 연산을 수행한다.
+즉, fitted Q iteration을 $\hat{T}$ backup으로 간주하는 것은 합리적이다.
 
+실제로는 L2-norm을 최소화하지만,  이론적 분석을 단순화 하기위해 $\infty$-norm을 최소화한다고 가정한다.
+일종의 이상적인 알고리즘을 가정해, error가 문제의 parameters에 어떻게 의존하는지는 연구할 수 있다.
+* 나아가, 매 iteration바다 $\infty$-norm error가 특정 상수 이하로 유지된다고 가정한다.
+  * 매우 강력한 assumption이다.
+  * $||\hat{Q}_{k+1} - \hat{T}\hat{Q}_k||_\infty \leq \epsilon_k$
+* Lecture 7에서 L2 norm을 사용하면 fitted Q iteration이 수렴하지 않는다는 것을 증명했다.
+* $\infty$-norm을 사용하면 bellman backup이 contraction이라는 성질을 가지게 되어 error가 어떻게 누적되는지 계산하기 훨씬 쉬워진다.
+* $\infty$-norm은 가장 error가 큰 state를 기준으로 분석을 진행하기 때문에 $\infty$-norm이 일정 범위 안에 있다면, 그보다 작은 L2-norm에서도 당연히 성능이 보장될 것이라는 보수적인 접근법을 고려한다.
 
+여기서 물을 수 있는 질문은 다음과 같다.
+Iteration을 무한으로 반복할 때 $\hat{Q}_k$은 어디로 수렴하는가?
+* 특히, 실제 최적값인 $Q^\star$와 얼마나 차이가 나는가?
+* $\lim_{k \rightarrow \infty}||\hat{Q}_k - Q^\star||_\infty \leq ?$
 
+## 3.1. Sampling Error
+
+<p align="center">
+  <img src="asset/17/fitted_q_iteration_sampling_error.jpg" alt="Analyzing sampling error"  width="800" style="vertical-align:middle;"/>
+</p>
+
+먼저 sampling error만 분석하자.
+* $T$는 $r, P$를 알고 있는 것이고, $\hat{T}$는 샘플링으로 추정한 $\hat{r}, \hat{P}$만 안다는 것이다.
+* Triangle inequality를 사용해 2 번째 줄의 부등식 수식을 얻을 수 있다.
+* 호프딩 부등식으로 첫 번째 term의 upper bound를 구할 수 있다.
+
+$$
+\begin{aligned}
+P(|\hat{X} - \mathbb{E}[X]| \geq \epsilon) &\leq 2 \exp\left(-\frac{2n\epsilon^2}{(b_+ - b_-)^2}\right) \\
+
+\epsilon &\leq (b_+ - b_-)\sqrt{\frac{\log(2/\delta)}{2n}} \\
+&= (R_\text{max} - (-R_\text{max}))\sqrt{\frac{\log(2/\delta)}{2n}}\\
+&= 2R_\text{max}\sqrt{\frac{\log(2/\delta)}{2n}}
+\end{aligned}
+$$
+
+* Concentration inequalities으로 두 번재 term의 upper bound를 구할 수 있다.
+
+<p align="center">
+  <img src="asset/17/fitted_q_iteration_sampling_error2.jpg" alt="Analyzing sampling error"  width="800" style="vertical-align:middle;"/>
+</p>
+
+Reward와 dynamics model error의 union bound로 sampling error의 bound가 결정된다.
+* 상수가 조금 변할 뿐, 기본 원리는 같다.
+* $\text{error} \propto \frac{1}{\sqrt{N}}$
+
+## 3.2. Approximation Error
+
+<p align="center">
+  <img src="asset/17/fitted_q_iteration_approximation_error.jpg" alt="Analyzing approximation error"  width="800" style="vertical-align:middle;"/>
+</p>
+
+Approximation error가 upper bound $\epsilon_k$를 가진다고 가정한다.
+
+$$||\hat{Q}_{k+1} - T\hat{Q}_k||_\infty \leq \epsilon_k$$
+
+* 이해를 돕기 위해 잠시 back operator $\hat{T} = T$로 정확하게 동작한다고 하여 approximation error만 보자.
+
+실제로 supervised learning에서는 $\infty$-norm의 upper bound를 보장하기 어렵다.
+* 보통 SL에서는 각 샘플의 평균의 loss로 학습이 진행되기 때문에 99개의 데이터가 잘 맞추고 1개가 outlier라도 잘 학습이 되었다고 판단한다.
+* $\infty$-norm을 사용해 최적화할 때는 미분이 안되고, 노이즈에 극도로 취약해 수렴이 어렵다는 특성이 있다.
+* 또한, 학습 데이터에서 최적화가 잘 되었더라고 한 번도 본 적 없는 데이터의 $\infty$-norm은 매우 크기 때문에 upper bound를 보장하는 것이 어렵다.
+* $\infty$-norm을 최적화하는 Chebyshev Approximation 연구가 있긴 있다.
+
+하지만 분석을 위해 $\infty$-norm의 upper bound가 보장된다고 가정한다.
+
+이를 통해 처음에 던졌던 질문의 답을 구해보자.
+* $Q^\star$는 bellman backup을 진행해도 변하지 않는 최적의 고정된 값이다.
+  * $Q^\star = TQ^\star$
+* 이 가정을 바탕으로 triangle inequality를 적용하면 위의 수식을 얻을 수 있다.
+* 마지막에 bellman backup 연산은 $\infty$-norm에서 $\gamma$-contraction 연산인 사실을 적용한다.
+
+<p align="center">
+  <img src="asset/17/fitted_q_iteration_approximation_error2.jpg" alt="Analyzing approximation error"  width="800" style="vertical-align:middle;"/>
+</p>
+
+위에서 얻은 재귀식을 풀면 위의 사진과 같아진다.
+* Discount factor $\gamma$는 1보다 작기 때문에, iteration 횟수 $k$가 늘어날수록 초기값의 영향은 사라진다는 것을 볼 수 있다.
+* Iteration이 무한대로 진행되면 초기 error 값은 사라진다.
+* 식을 단순화하기 위해, 모든 단계에서의 error upper bound 중 최대값 $\max_k \epsilon_k$만 사용한다.
+* 최종적으로 무한 등비급수의 합을 사용해 익숙한 형태의 upper bound를 얻을 수 있다.
+  * $\gamma$가 크면 더 많은 horizion을 반영하므로 error의 upper bound가 커진다.
+
+## 3.3. Conclusion: Put Together
+
+<p align="center">
+  <img src="asset/17/fitted_q_iteration_concolusion.jpg" alt="Put Together"  width="800" style="vertical-align:middle;"/>
+</p>
+
+마지막으로 $\epsilon_k$에 sampling error를 겹합해 최종 upper bound를 유도하자.
+
+$$||\hat{Q}_{k+1} - T\hat{Q}_k||_\infty \leq \epsilon_k$$
+
+실제 $T$를 모르기 때문에 $\epsilon_k$에서는 sampling error도 고려해야 한다.
+$\epsilon_k$의 좌변을 triangle inequality로 풀어쓰면 진정한 approximation error term과 sampling error term으로 나눌 수 있다.
+이를 $\max_k \epsilon_k$에 대입하면 최종 결론을 얻을 수 있다.
+
+<p align="center">
+  <img src="asset/17/fitted_q_iteration_concolusion2.jpg" alt="Put Together"  width="800" style="vertical-align:middle;"/>
+</p>
+
+가장 중요한 핵심은 error가 $\frac{1}{(1-\gamma)^2}$ 규모로 커진다는 것이다.
+* 최종 error는 3개의 term으로 결정된다.
+  * 진정한 approximation error $\epsilon_k$ term
+    * $T$가 무엇이든 임의의 $\epsilon$에 bound 된다.
+    * 따라서 3.2 section에서는 $T$를 사용해서 어떤 $\epsilon$에 bound되는 것을 봤다.
+    * 지금은 $\hat{T}$를 사용하는 것으로 3.2 section에서 봤던 $\epsilon_k$와 다른 값으로 upper bound를 가지게 되는 것이다.
+  * Reward function error term (sampling error의 첫 번째 term)
+  * Transition function error term (sampling error의 두 번째 term)
+* Sampling error의 두 번째 term에서 $||Q||_\infty$는  $R_\text{max} \frac{1}{1-\gamma}$ 수준의 크기를 가진다는 것을 논의했다.
+  * 계속 최대 reward $R_\text{max}$를 얻고, 무한대 horizion에서 무한등비급수의 합 형태를 가지기 때문이다.
+* 이 때문에 $\frac{1}{(1-\gamma)^2}$에 가장 많이 영향을 받아 error가 증가하게 된다.
+  * 이는 section 2.3의 결론과 같다.
+
+지금까지의 분석은 $\infty$-norm의 upper bound가 존재한다는 강력한 가정을 전레로 했다.
+하지만 이는 현실적으로 항상 유지되기 어려운 가정이다.
+
+발전된 연구에서는 특정 분포 하에서 $p$-norm을 사용해 분석하기도 한다.
+* $p, \mu$-norm이라는 이름으로 특정 분포 $\mu$ 하에서 기댓값을 계산하여 그 결과에 $p$-norm을 적용하는 것이다.
+* $p$가 2라면 흔히 사용하는 quadratic bellman error와 연결된다.
+* 다만 이 경우도 알고리즘이 발산하지 않도록 몇 가지 추가적인 가정이 필요하다.
 
 
 
