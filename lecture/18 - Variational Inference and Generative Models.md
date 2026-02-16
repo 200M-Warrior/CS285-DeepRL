@@ -286,4 +286,220 @@ Amortized variational inference에는 generative model $p_\theta(x|z)$와 infere
 어떤 $q$를 사용하든 $\log p(x_i)$의 lower bound를 만들 수 있지만, 이 lower bound는 $q$가 posterior $p(z|x_i)$에 근사할 때 가장 tight해진다.
 * 이전에 KLD와 ELBO의 관계로 유도하였다.
 
-ELBO에 대한 gradient ascent를 $\theta, \phi$에서 진행해야 한다.
+ELBO $\mathcal{L}$의 gradient ascent를 $\theta, \phi$에서 진행한다.
+$\theta$에 대한 gradient ascent는 자명하다.
+문제는 $\phi$에 대한 gradient를 계산해야 한다는 것이다.
+* $q_\phi$는 평균 $\mu_\phi(x)$와 분산 $\sigma_\phi(x)$를 가지는 Gaussian 분포로 가정한다.
+* $q_\phi$는 기댓값을 취하는 기준이 되는 분포와 entropy term에서 나타난다.
+* $\phi$와 무관한 어떤 quantity의 기댓값을 $\phi$로 매개변수화된 분포 하에서 구하는 것은 policy gradient에서 본 형태와 비슷하다.
+  * Policy gradient에서는 policy $\pi_\theta(a|s)$ 분포 하에서 reward의 기댓값을 최대로 만들도록 학습된다.
+  * 기댓값 term 안의 값을 reward라 고려할 수 있다.
+  * 기댓값 term을 $J(\phi)$라 정의했을 때 했을 때, policy gradient와 같은 과정을 거치면 위 그림의 좌하단의 수식을 얻을 수 있다.
+    * $q_\phi$에서 샘플링하고 샘플들을 평균내어 $\nabla_\phi J$를 추정한다.
+    * Policy gradient와 같이 환경과 상호작용할 필요가 없기 때문에 큰 비용을 들이지 않고 샘플을 생성할 수 있다.
+  * 하지만, policy gradient와 같이 높은 분산을 가지기 때문에 noise가 많거나 정확한 gradient를 얻기 위해 많은 샘플을 수행해야 한다는 불편한 점이 있다.
+  * 분산을 낮춰 더 나은 gradient를 추정하기 위해 reparameterization trick을 사용한다.
+* Gaussian의 entropy term은 closed form으로 계산할 수 있다.
+
+## 2.3. The Reparameterization Trick
+
+<p align="center">
+  <img src="asset/18/reparameterization.jpg" alt="The Reparameterization Trick"  width="800" style="vertical-align:middle;"/>
+</p>
+
+RL에서는 dynamics model을 통한 미분 계산이 불가능하기 때문에 policy gradient를 사용한다.
+* Action을 했을 때 dynamics model로부터 얻은 reward가 있을 때, action과 reward 사이에는 gradient 흐를 수 없다.
+* 따라서 $\pi_\theta$의 parameter인 $\theta$에 대한 gradient를 구할 수 없다.
+* 이를 해결하기 위해 샘플링을 통해 gradient를 추정하는 방식을 사용하고, 이 때문에 분산이 높아진다.
+  * 똑같은 상황에서도 뽑힌 샘플에 따라 gradient가 계속 달라지거나, reward가 거의 마지막에 관찰되는 등 불확실성이 많다.
+
+Amortized variational inference에서는 미분 불가능한 dynamics가 없어 reparameterization trick으로 gradient를 계산할 수 있다.
+* $r(x_i, z_i)$는 단지 학습 중인 모델 하에서의 로그 확률일 뿐이며, 이는 미분 가능한 또 다른 neural network이기 때문입니다. 따라서 $\phi$에 대한 gradient를 계산할 수 있습니다.
+
+Reparameterization trick으로 $\phi$는 deterministic한 quantity $\mu_\phi, \sigma_\phi$에만 영향을 끼치기 때문에 더 낮은 분산을 가지게 된다.
+* 확률적인 요소는 $\epsilon \sim \mathcal{N}(0,1)$로 결정된다.
+
+## 2.4. Another way to look at it
+
+<p align="center">
+  <img src="asset/18/avi2.jpg" alt="Another way to look at it"  width="800" style="vertical-align:middle;"/>
+</p>
+
+ELBO의 2번째 term과 3번째 term을 다시 합치면 KLD가 된다.
+* $q_\phi$를 Gaussian 분포로 가정했는데, 이때 $p(z)$또한 Gaussian 분포로 가정하면 KLD는 analytic form으로 쉽게 구할 수 있다.
+  * 두 분포의 평균과 분산에 관한 식이 나오게 된다.
+* KLD에 관한 gradient를 구할 때 샘플링이 전혀 필요없다.
+
+ELBO의 첫 번째 term은 reparameterization term으로 구할 수 있다.
+
+## 2.5. Reparameterization trick vs Policy gradient
+
+<p align="center">
+  <img src="asset/18/avi3.jpg" alt="Another way to look at it"  width="800" style="vertical-align:middle;"/>
+</p>
+
+Entropy term을 제외한 뒤, reparameterization trick과 policy gradient를 비교해보다.
+
+Policy gradient
+* Discrete 변수와 continuous latent 변수 모두 다룰 수 있다.
+* $q$가 어떤 분포이든 상관없다.
+* 분산이 높고 각 $x$마다 여러 개의 샘플을 뽑아야 하며, 더 작은 learning rate가 필요하다.
+
+Reparameterization trick
+* Continuous latent 변수만 다룰 수 있다.
+  * $z$에 대한 $r$의 gradient가 정의되지 않는다.
+  * 미분에 필요한 연속성 특징이 discrete 변수에는 없다.
+  * 하지만, gumbel-softmax라는 게 있으니 참고하자.
+* 분산이 낮고 하나의 샘플만으로도 잘 작동한다.
+
+따라서 amortized variation inference를 구현할 때 continuous 변수일 경우 reparameterization trick을 사용하는 것이 좋습니다. 
+만약 discrete 변수라면 policy gradient 스타일의 추정치를 사용해야 한다.
+* RL의 policy gradient에서는 $r$을 $z$에 대해 미분하지 않는다.
+
+# 3. Variational Inference in Deep RL
+
+이번 강의에서는 amortized variational inference로 훈련된 generative model을 응용하는 방법에 초점을 맞춰 실제 예시를 살펴본다.
+Variational inference이 deep learning에서 갖는 역할에 대해서는 이후 강의에서 더 폭넓게 논의하겠다.
+
+## 3.1. Variational Autoencoder
+
+<p align="center">
+  <img src="asset/18/vae.jpg" alt="Variational Autoencoder"  width="800" style="vertical-align:middle;"/>
+</p>
+
+VAE (Variational Autoencoder)에서는 image $x$와 latent vector $z$를 사용해 모델링한다.
+* $p(z)$는 표준정규분포라고 가정한다.
+* Reconstruction error를 통해 $\phi, \theta$를 학습한다.
+* KLD regularizer도 함께 고려한다.
+
+Encoder는 prior 분포 $p(z)$와 가까워지기 위해 KLD term으로 분산을 1로 최대한 유지한다. 
+* 즉, latent space을 매우 알뜰하게(frugal) 사용하고 싶어 한다.
+* Latent space에 사용되지 않는 빈 공간이 있다면, 인코더는 그 공간까지 확장하여 분산을 키움으로써 분산 값을 1에 더 가깝게 만들려 할 것이다.
+* 결과적으로 $z$와 $ㅌ$ 사이의 매핑이 촘촘하게 이루어져서, 표준 가우시안 사전 분포에서 샘플링한 거의 모든 $z$가 유효한 $x$로 매핑된다.
+* 이는 image를 인코딩하여 representaiton $z$를 얻을 수 있을 뿐만 아니라, prior 분포에서 샘플링하고 디코딩하여 그럴듯한 image를 얻을 수 있음을 의미한다.
+
+<p align="center">
+  <img src="asset/18/vae2.jpg" alt="Variational Autoencoder in RL"  width="800" style="vertical-align:middle;"/>
+</p>
+
+State가 action을 추론하는데 모든 정보를 포함하고 있고, markovian을 만족한다고 하자.
+
+관측되는 state data가 image처럼 배우 복잡한 경우가 있다.
+이 상황에서 VAE를 학습하고, image를 더 나은 representation으로 표현해 RL학습을 진행할 수 있다.
+
+VAE는 prior 분포 $p(z)$와의 KLD term으로 latent vector $z$의 각 차원이 서로 독립적으로 강제할 수 있다. 
+즉, variation의 factor를 disentangle할 수 있다는 의미이다.
+직관적으로 해골의 위치, 캐릭터 위치가 서로 독립적인 factor로 $z$에 표현되기 때문에 VAE가 잘 동작한다는 것이다.
+* 예를 들어, Montezuma's Revange에서 캐릭터의 pixel 하나하나를 살피는 대신 캐릭터 pixel 덩어리가 움직이는 위치와 속도를 알고 싶을 것이다.
+* 즉, 캐릭터, 해골, 열쇠 등의 위치, 방향, 속도 등이 image를 구성하는 근본적인 factor이고 image pixel 그 자체보다 훨씬 더 간결하고 유용한 표현이다.
+
+좌하단의 그림의 $\beta$-VAE에서 basis factor가 명확한 데이터로 VAE를 훈련했을 때, latent variable $z$를 interpolation하고 decoding하면 자연스러운 회전하는 image를 얻을 수 있다.
+
+Atari 게임에서 Q-learning은 다음과 같이 학습한다.
+* Transition 데이터를 수집해 replay buffer에 저장한다.
+* 샘플 image 데이터로 VAE를 학습/개선한다.
+* Q function의 입력으로 image 그자체가 아닌 latent variable을 넣어 Q function을 업데이트한다.
+* Prior data를 활용해 사전 학습을 미리 해서 바로 좋은 representation을 사용할 수 있다.
+물론 Q-learning을 진행하면서 실시간으로 동시에 VAE를 학습할 수도 있다.
+
+## 3.2. Conditional Models
+
+<p align="center">
+  <img src="asset/18/conditional_models.jpg" alt="Conditional Models"  width="800" style="vertical-align:middle;"/>
+</p>
+
+Conditional VAE에 대해서 살펴보자.
+이것의 목표는 image의 분포 $p(x)$를 모델링하는 것이 아니라, 조건부 분포 $p(y|x)$를 모델링하는 것이다.
+
+$p(y|x)$ 자체가 매우 복잡하고, multimodal일 수 있다.
+이를 위해 encoder와 decoder 모두에서 조건으로 $x_i$를 주면된다.
+* 선택적으로 prior 분포 $p(x)$에도 조건으로 넣을 수 있지만, 반드시 그럴 필요는 없으며 일반적으로 unconditional prior $p(x)$를 사용하는 것이 매우 일반적이다.
+
+Policy 학습이 이 형태로, $y$가 action $x$가 observation이다.
+* 노이즈 샘플 $z$를 입력으로 받는 policy인 $p(y|x,z)$로 생각할 수 있다.
+
+CVAE는 imitation learning에서 훨씬 더 자주 사용된다.
+* RL의 objective는 최적 policy를 배우는 것이고 완전 관측 MDP에서는 최적 policy는 보통 deterministic이다.
+  * CVAE는 $\epsilon$에 의해 확률적인 action을 할 수 있다.
+* 하지만, imitation learning에서는 multimodal이거나 non markovian인 인간의 행동을 모방해야 할 수도 있다.
+  * 나무를 피하는 예시에서 사람은 왼쪽으로 갈 수 있고 오른쪽으로 갈 수 있기 때문에 확률적으로 행동해도 괜찮다.
+
+<p align="center">
+  <img src="asset/18/conditional_models2.jpg" alt="Conditional Models"  width="800" style="vertical-align:middle;"/>
+</p>
+
+이전에 논의했던 'learning latent plans from play' 논문에서 CVAE는 개별 action이 아니라 action sequence (plans)를 모델링했다.
+* 인간은 같은 시작점과 끝점 사이에서도 다양한 action 조합을 실행할 수 있는데, latent variable $z$가 이러한 선택의 차이를 설명한다.
+
+또 다른 논문으로 $bimanual manipulator$가 신발을 신기는 것과 같은 복잡한 task를 배우는 영상이 있다.
+* CVAE의 encoder, decoder는 모두 Transformer로 구현되어 있다.
+* Encoder는 action sequence를 입력받아 $z$로 encodeing한다.
+* Decoder는 로봇의 여러 카메라가 input과 $z$를 받아 미래의 action sequence를 생성한다.
+
+결론적으로, CVAE는 일반적인 Gaussian 분포로는 불가능한 훨씬 복잡한 policy를 표현하기 위해 imitation learning 분야에서 아주 많이 응용되고 있다.
+
+## 3.3. State space models
+
+<p align="center">
+  <img src="asset/18/state_space_models.jpg" alt="State space models"  width="800" style="vertical-align:middle;"/>
+</p>
+
+Model-based RL에서 살펴본 partially observation system을 다뤄보자.
+* State는 모르지만 observation sequence를 알 수 있는 환경에서, 실제 state의 latent를 VAE의 latent variable $z$로 대신하는 state space models를 학습한다.
+
+State $s$ 대신 observation $o$가 있는 상황에서 $z, o$가 포함된 sequence를 하나의 latent vector $z$와 하나의 observation vector $x$로 모델링할 것이다.
+* 이것은 sequence VAE라고 부른다.
+* $z$는 무엇이고, $x$는 무엇인가? Prior 분포, decoder, encoder의 형태는 어떠해야 하는가?
+
+Latent vector $z$가 하나의 sequence $z_1, \cdots z_T$이고 observation vector $x$도 관측의 sequence $o_1, \cdots, o_T$이기 때문에 이전에 설명한 RL 모델들보다 훨씬 복잡하다.
+또한 action sequence가 조건부로 있는 모델이기 때문에 conditional sequence VAE가 된다.
+
+$z_i$ 간에 dynamics가 존재하므로 prior는 더 구조화되어야 한다.
+즉, 일반 VAE처럼 $z$의 각 element가 독립적이기를 원하지 않는다.
+* Prior $p(z)$를 표준정규분포인 $p(z_1)$과 $p(z_{t+1}|z_t, a_t)$의 곱으로 정의한다.
+  * Sequence VAE에서는 이 dynamics 또한 보통 함께 학습된다.
+  * 첫 단계는 Gaussian이지만, 이후 단계들을 이전 $z$에 의존한다.
+
+Decoder는 $z$를 $o$로 복원한다.
+* 일반적으로 Markovian state space를 형성하기 때문에 $z_i$에 해당 time step 필요한 모든 정보가 요약되어 있으므로, 각 time step별로 $p(o_t|z_t)$가 독립적이다.
+
+Encoder는 time step $t$까지의 관측으로 latent variable $z_t$를 구한다.
+* Partially observation 환경에서는 observation $o_t$만으로 latent variable $z_t$에 대한 충분한 정보를 알 수 없다는 것이 핵심이다.
+* 따라서 encoder 부분이 가장 복잡하다.
+* 물론 여기에 이전 latent variable $z_{t-1}$을 고려하면 더 나은 encoder $q_\phi(z_t|z_{t-1}, o_{1:t})$를 얻을 수 있다.
+* Encoder의 아키텍처는 논문마다 다양한 것을 사용할 수 있지만, 모두 유효한 EBLO를 형성한다는 공통점이 있다.
+
+<p align="center">
+  <img src="asset/18/state_space_models2.jpg" alt="State space models"  width="800" style="vertical-align:middle;"/>
+</p>
+
+이 예시에서 decoder는 독립적이지만 prior 분포 때문에 $z_i$들은 모두 밀접하게 연관되어 있다.
+Encoder는 image를 history를 입력받아 현재 $z_t$에 대한 분포를 형성하며, LSTM이나 transformer와 같은 sequence model로 구현될 수 있다.
+이 구조에선 이전 $z_{t-k}$ 값들을 넣는 것도 쉬워진다.
+
+<p align="center">
+  <img src="asset/18/state_space_models3.jpg" alt="State space models"  width="800" style="vertical-align:middle;"/>
+</p>
+
+한 가지 application은 state space model을 학습한 뒤, state space 내에서 planning을 하는 것이다.
+
+Embed to Control (E2C) 논문에서는 cartpole, point mass와 같은 간단한 시스템에서 latent space embedding을 학습한다.
+실제 state space를 모르지만, 관찰된 pixel data로부터 실제 state를 추론했다.
+
+알고리즘이 발전해 우측 논문과 같이 실제 로봇을 제어하는데 사용되기도 한다.
+Sequence VAE는 로봇의 다음 image를 예측하며, policy는 이를 바탕으로 레고 블록을 쌓도록 로봇을 control한다.
+
+이후 이러한 방식들은 수많은 image 기반 task에 적용되었으며, 다양한 encoder 및 planning 알고리즘과 결합하여 우수한 성능을 보였다.
+* LQR(Linear Quadratic Regulator)부터 랜덤 샘플링, 그리고 trajectory optimizers 등이 있다.
+
+<p align="center">
+  <img src="asset/18/state_space_models4.jpg" alt="State space models"  width="800" style="vertical-align:middle;"/>
+</p>
+
+또 다른 application으로 sequence VAE로 state space의 latent representation을 추론한 뒤 RL을 수행하는 것이다.
+
+Stochastic Latent Actor-Critic이라는 논문에서는 image의 latent vector $z$를 활용해 Q function 기반의 actor-critic 알고리즘인 Soft Actor-Critic을 사용해 policy를 업데이트한다.
+* 실제 시스템의 roll outs(실행 결과)와 VAE에서 생성된 샘플들을 비교하면, VAE가 실제 시스템과 매우 유사한 비디오를 생성하는 법을 배우고 있음을 알 수 있다.
+
+또 다른 논문은 actor-critic 알고리즘과 short horizon roll outs을 결합하여 매우 유사한 작업을 수행했다. 
+* Sequence VAE로 latent state $z$를 구하고 planning과 RL을 결합한 형태이다.
