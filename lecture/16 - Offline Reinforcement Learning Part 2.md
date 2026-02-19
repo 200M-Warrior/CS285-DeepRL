@@ -138,7 +138,7 @@ $$
 </p>
 
 구현 시 일반 Q 함수를 구하는 방식으로 critic의 loss 함수를 구성하고 actor는 weighted maximum likelihodd로 loss 함수를 구성한다.
-그리고 Q 함수 업데이트 $leftrightarrow$ Policy 업데이트를 반복하며 학습을 진행한다.
+그리고 Q 함수 업데이트 $\leftrightarrow$ Policy 업데이트를 반복하며 학습을 진행한다.
 
 이것이 implicit constraint trick을 사용해 constrained actocritic framework를 구현하는 것이다.
 이 알고리즘은 AWAC(Advantage Weighted Actor-Critic)라고 불린다.
