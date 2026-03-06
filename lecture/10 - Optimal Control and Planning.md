@@ -395,4 +395,3 @@ iLQR에서는 forward pass에서 backtracking을 수행할 수 있다.
   * Bracketing line search를 같은 것이 좋은 선택이 될 수 있다.
 
 추가로 읽은 만한 paper는 lecture 10, part 5 강의를 참고하자.
-

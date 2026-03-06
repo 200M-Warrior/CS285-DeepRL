@@ -412,7 +412,3 @@ $\epsilon_k$의 좌변을 triangle inequality로 풀어쓰면 진정한 approxim
 * $p, \mu$-norm이라는 이름으로 특정 분포 $\mu$ 하에서 기댓값을 계산하여 그 결과에 $p$-norm을 적용하는 것이다.
 * $p$가 2라면 흔히 사용하는 quadratic bellman error와 연결된다.
 * 다만 이 경우도 알고리즘이 발산하지 않도록 몇 가지 추가적인 가정이 필요하다.
-
-
-
-

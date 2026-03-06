@@ -489,26 +489,3 @@ Action에 관한 feature도 가져야하기 때문에 state feature matrix보다
 수식적으로 LSPI는 깔끔하지만, 이번 강의 section 3에서 살펴 봤다시피 argmax로 생성되는 adversarial example로 인해 실전에서는 distribution shift 문제가 발생한다.
 
 이는 다음 lecture 16에서 논의하자.
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

@@ -392,9 +392,3 @@ Reward function을 학습하기 않기 때문에 inverse RL이 아니지만, 전
 <p align="center">
   <img src="asset/20/irl_gan7.jpg" alt="Inverse RL and GANs"  width="800" style="vertical-align:middle;"/>
 </p>
-
-
-
-
-
-
